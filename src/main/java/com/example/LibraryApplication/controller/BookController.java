@@ -2,6 +2,7 @@ package com.example.LibraryApplication.controller;
 
 import com.example.LibraryApplication.model.Book;
 import com.example.LibraryApplication.service.BookService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
@@ -9,6 +10,8 @@ import java.util.*;
 @RestController
 @RequestMapping("/books")
 public class BookController {
+
+    @Autowired
     private final BookService bookService;
 
     public BookController(BookService bookService){
@@ -23,7 +26,7 @@ public class BookController {
     @GetMapping("/{id}")
     public ResponseEntity<Book> getBookById(@PathVariable int id){
         Book book = bookService.getBookById(id);
-        return book != null ? ResponseEntity.ok(book) : ResponseEntity.notFound().build();
+        return ResponseEntity.ok(book);
     }
 
     @PostMapping
@@ -50,7 +53,8 @@ public class BookController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@PathVariable int id){
-        return bookService.deleteBook(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    public ResponseEntity<String> deleteBook(@PathVariable int bookId, @PathVariable int userId){
+        String message = bookService.deleteBook(bookId, userId);
+        return ResponseEntity.ok(message);
     }
 }
