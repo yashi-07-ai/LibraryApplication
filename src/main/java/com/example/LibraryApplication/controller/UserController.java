@@ -1,5 +1,6 @@
 package com.example.LibraryApplication.controller;
 
+import com.example.LibraryApplication.dto.UserDTO;
 import com.example.LibraryApplication.model.Book;
 import com.example.LibraryApplication.model.User;
 import com.example.LibraryApplication.service.BookService;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
+@ControllerAdvice
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -23,19 +25,21 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable int id){
-        User user = userService.getUserById(id);
-        return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
+    public ResponseEntity<User> getUserById(@PathVariable Long id){
+        Optional<User> user = userService.getUserById(id);
+        return user != null ? (ResponseEntity<User>) ResponseEntity.ok() : ResponseEntity.notFound().build();
     }
 
-    @PostMapping
-    public User addUser(@RequestBody User user){
-        return userService.addUser(user);
+    @PostMapping("/addUser")
+    public ResponseEntity<User> addUser(@RequestBody UserDTO userDto){
+        User user = userService.addUser(userDto);
+        return ResponseEntity.ok(user);
     }
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable int id){
-        return userService.deleteUser(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    public ResponseEntity<String> deleteUser(@PathVariable Long id){
+        String message = userService.deleteUser(id);
+        return ResponseEntity.ok(message);
     }
 }

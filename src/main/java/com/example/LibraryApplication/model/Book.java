@@ -1,30 +1,33 @@
 package com.example.LibraryApplication.model;
 
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Entity
+@Table(name = "books")
 public class Book {
-    private Integer id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="book_id")
+    private Long id;
+
+    @Column(name="title")
+    @NotNull
     private String title;
+
+    @Column(name = "author")
+    @NotNull
     private String author;
+
+    @NotNull
+    @Column(name="isbn")
     private String isbn;
-    private boolean available;
-    private Integer borrowedBy;
 
-    public void setId(int id){
-        this.id = id;
-    }
-
-    public int getId(){
-        return this.id;
-    }
-
-    public void setAvailable(boolean status){
-        available = status;
-    }
-
+    @Column(name = "status")
+    private boolean available = true;
 }
