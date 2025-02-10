@@ -1,67 +1,132 @@
 package com.example.LibraryApplication.controller;
 
-import com.example.LibraryApplication.exceptions.UserAlreadyExists;
-import com.example.LibraryApplication.exceptions.ErrorResponse;
-import com.example.LibraryApplication.model.Book;
+import com.example.LibraryApplication.dto.*;
+import com.example.LibraryApplication.exceptions.*;
 import com.example.LibraryApplication.service.BookService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-//import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.*;
 
+
 @RestController
-@RequestMapping("/books")
+@RequestMapping("/api/books")
+@Tag(name = "Book API", description = "Manage books in the library")
 public class BookController {
+
     private final BookService bookService;
 
-    public BookController(BookService bookService){
+    public BookController(BookService bookService) {
         this.bookService = bookService;
     }
 
-    @GetMapping
-    public List<Book> getAllBooks(){
+    @GetMapping("/search-all")
+    @Operation(summary = "Get all books", description = "Retrieve all books in the library")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Books retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "No books found")
+    })
+    public List<BookResponseDTO> getAllBooks() {
         return bookService.getAllBooks();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Book> getBookById(@PathVariable Long id){
-        Book book = bookService.getBookById(id);
-        return book != null ? ResponseEntity.ok(book) : ResponseEntity.notFound().build();
+    @GetMapping("/search-id/{id}")
+    @Operation(summary = "Get book by ID", description = "Retrieve a book by its unique ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Book found"),
+            @ApiResponse(responseCode = "404", description = "Book not found")
+    })
+    public BookResponseDTO getBookById(
+            @Parameter(description = "Unique ID of the book", required = true)
+            @PathVariable Long id) {
+        return bookService.getBookById(id);
     }
 
-    @PostMapping("/addBook")
-    public Book addBook(@RequestBody Book book){
-        return bookService.addBook(book);
+    @GetMapping("/search-title/{title}")
+    @Operation(summary = "Get book by Title", description = "Retrieve a book by its title")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Book found"),
+            @ApiResponse(responseCode = "404", description = "Book not found")
+    })
+    public List<BookResponseDTO> getBookByTitle(
+            @Parameter(description = "Title of the book", required = true)
+            @PathVariable String title) {
+        return bookService.getBookByTitle(title);
     }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<Book> updateBook(@PathVariable int id, @RequestBody Book book){
-//        Book updatedBook = bookService.updateBook(id, book);
-//        return updatedBook != null ? ResponseEntity.ok(updatedBook) : ResponseEntity.notFound().build();
+    @PostMapping("/addBook/{userId}")
+    @Operation(summary = "Add a new book", description = "Create a new book in the library")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Book added successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input")
+    })
+    public BookResponseDTO addBook(@RequestBody BookDTO bookDto, @PathVariable Long userId){
+        return bookService.addBook(bookDto, userId);
+    }
+
+    @PostMapping("/upload/{userId}")
+    @Operation(summary = "Upload a file", description = "Upload a file containing book data")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "File uploaded successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid file")
+    })
+    public ResponseEntity<String> uploadFile(
+            @Parameter(description = "File containing book data", required = true)
+            @RequestParam("file") MultipartFile file,
+            @Parameter(description = "User ID who is uploading the file", required = true)
+            @PathVariable Long userId) {
+        if (file.isEmpty()) {
+            throw new NullFieldException("Please upload a file");
+        }
+        bookService.processFile(file, userId);
+        return ResponseEntity.ok("File uploaded successfully. Processing in background.");
+    }
+
+
+//    @PostMapping("/upload-picture")
+//    public ResponseEntity<?> uploadPicture(@RequestParam("file") MultipartFile file) {
+//        if (file.isEmpty()) {
+//            throw new NullFieldException("Please upload the file");
+//        }
+//        bookService.processFile(file);
+//        return ResponseEntity.ok("File uploaded successfully. Processing in background.");
 //    }
 
-//    @PostMapping("/{bookId}/borrow/{userId}")
-//    public ResponseEntity<String> borrowBook(@PathVariable int bookId, @PathVariable int userId){
-//        String message = bookService.borrowBook(bookId, userId);
-//        return ResponseEntity.ok(message);
-//    }
+    @PutMapping("/update/{userId}")
+    @Operation(summary = "Update a book", description = "Update book details")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Book updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input")
+    })
+    public BookResponseDTO updateBook(
+            @Parameter(description = "User ID of the updater", required = true)
+            @PathVariable Long userId,
+            @RequestBody BookDTO updatedBook) {
+        return bookService.updateBook(userId, updatedBook);
+    }
 
-//    @PostMapping("/return/{bookId}")
-//    public ResponseEntity<String> returnBook(@PathVariable int bookId){
-//        String message = bookService.returnBook(bookId);
-//        return ResponseEntity.ok(message);
-//    }
-
-    @DeleteMapping("/{bookId}/delete/{userId}")
-    public ResponseEntity<String> deleteBook(@PathVariable Long bookId, @PathVariable Long userId) {
+    @DeleteMapping("/{bookId}/user/{userId}")
+    @Operation(summary = "Delete a book", description = "Delete a book from the library")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Book deleted successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid book or user ID")
+    })
+    public ResponseEntity<String> deleteBook(
+            @Parameter(description = "Book ID to be deleted", required = true)
+            @PathVariable Long bookId,
+            @Parameter(description = "User ID of the requester", required = true)
+            @PathVariable Long userId) {
         bookService.deleteBook(bookId, userId);
         return ResponseEntity.ok("Book deleted successfully");
     }
 
-    @ExceptionHandler(value = UserAlreadyExists.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleCustomerAlreadyExistsException(UserAlreadyExists ex) {
-        return new ErrorResponse(HttpStatus.CONFLICT.value(), ex.getMessage());
-    }
 }

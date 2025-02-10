@@ -2,6 +2,7 @@ package com.example.LibraryApplication.service;
 
 import com.example.LibraryApplication.model.BorrowedBooks;
 import com.example.LibraryApplication.model.User;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -10,6 +11,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @EnableAsync
 public class EmailService {
@@ -30,6 +32,7 @@ public class EmailService {
                 ". Please return it as soon as possible.\n\n" +
                 "Thank you!";
 
+        log.info("Sending email to : {}", user.getName());
         sendEmail(email, subject, body);
     }
 
@@ -40,6 +43,7 @@ public class EmailService {
         message.setText(body);
 
         javaMailSender.send(message);
+        log.info("Email sent");
     }
 
 }

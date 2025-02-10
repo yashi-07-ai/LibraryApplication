@@ -1,11 +1,13 @@
 package com.example.LibraryApplication.exceptions;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ResponseStatus(HttpStatus.CONFLICT)
 public class NoSuchBookExistsException extends RuntimeException{
-    private String message;
 
     public NoSuchBookExistsException(){}
-
     public NoSuchBookExistsException(String msg){
-        this.message = msg;
+        super(msg);
     }
 }

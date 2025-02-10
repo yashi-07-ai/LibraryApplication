@@ -2,15 +2,16 @@ package com.example.LibraryApplication.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "books")
 public class Book {
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="book_id")
@@ -25,9 +26,14 @@ public class Book {
     private String author;
 
     @NotNull
-    @Column(name="isbn")
+    @Column(name="isbn", unique = true)
     private String isbn;
 
     @Column(name = "status")
     private boolean available = true;
+
+    public boolean getAvailable() {
+        return available;
+    }
+
 }
