@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS books (
+    id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    author TEXT NOT NULL,
+    isbn VARCHAR(255) NOT NULL,
+    available BOOLEAN NOT NULL
+);
+
