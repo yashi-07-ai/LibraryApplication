@@ -3,6 +3,8 @@ package com.example.Library.service;
 import com.example.Library.model.BorrowedBooks;
 import com.example.Library.model.User;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -11,7 +13,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
-@Slf4j
 @Service
 @EnableAsync
 public class EmailService {
@@ -21,6 +22,8 @@ public class EmailService {
 
     @Value("${app.borrowPeriod}")
     private String borrowPeriod;
+
+    private static Logger log = LoggerFactory.getLogger(EmailService.class);
 
     @Async
     public void sendReminderEmailAsync(BorrowedBooks borrow) {

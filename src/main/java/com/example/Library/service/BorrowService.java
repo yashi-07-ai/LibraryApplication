@@ -40,7 +40,7 @@ public class BorrowService {
         return bookDTO;
     }
 
-    private static Logger log = LoggerFactory.getLogger(BookService.class);
+    private static Logger log = LoggerFactory.getLogger(BorrowService.class);
 
 
     @Transactional

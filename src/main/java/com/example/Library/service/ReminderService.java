@@ -3,6 +3,8 @@ package com.example.Library.service;
 import com.example.Library.model.BorrowedBooks;
 import com.example.Library.repository.BorrowedBooksRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -13,7 +15,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 @Service
 public class ReminderService {
     @Autowired
@@ -24,6 +25,8 @@ public class ReminderService {
 
     @Value("${app.borrowPeriod}")
     private String borrowPeriod;
+
+    private static Logger log = LoggerFactory.getLogger(ReminderService.class);
 
     @Async
     @Scheduled(cron = "0 0 9 * * ?")

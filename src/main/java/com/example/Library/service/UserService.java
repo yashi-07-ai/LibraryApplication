@@ -24,7 +24,7 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    private static Logger log = LoggerFactory.getLogger(BookService.class);
+    private static Logger log = LoggerFactory.getLogger(UserService.class);
 
     public UserResponseDTO convertToDTO(User user) {
         UserResponseDTO userResponseDTO = new UserResponseDTO();
