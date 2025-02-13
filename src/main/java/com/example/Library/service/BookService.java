@@ -14,6 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,6 +79,7 @@ public class BookService {
 
     private static Logger log = LoggerFactory.getLogger(BookService.class);
 
+    @Cacheable(value = "books")
     public List<BookResponseDTO> getAllBooks(){
         log.info("Getting all the books in the library");
         List<Book> books = bookRepository.findAll();
@@ -111,6 +115,7 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
+    @CachePut(value = "books")
     @Transactional
     public BookResponseDTO addBook(BookDTO bookDTO, Long id) {
         log.info("Adding a book to library");
@@ -222,6 +227,8 @@ public class BookService {
         return convertToDTO(book);
     }
 
+    @CacheEvict(value = "books", key = "#bookId")
+    @Transactional
     public void deleteBook(Long bookId, Long userId){
         // Fetch the user attempting to delete the book
         log.info("fetching book with id : {} to delete", bookId );

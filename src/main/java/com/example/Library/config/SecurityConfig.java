@@ -42,6 +42,7 @@ public class SecurityConfig {
                         .requestMatchers("*/borrow/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("*/books/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("*/user/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("*/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

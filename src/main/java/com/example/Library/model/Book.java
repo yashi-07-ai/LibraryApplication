@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.Comment;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
+
 
 @Component
 @AllArgsConstructor
@@ -17,7 +19,8 @@ import org.springframework.stereotype.Component;
 @Builder
 @Entity
 @Table(name="books")
-public class Book {
+public class Book implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
