@@ -55,14 +55,14 @@ public class JwtFilter extends OncePerRequestFilter {
 //            //role = "MEMBER";
 //        }
 
-        log.info("role : {}", role);
+        //log.info("role : {}", role);
 
         //checking if the user is present and the authentication haven't been done already
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.toUpperCase());
             User userDetails = new User(username, "", List.of(authority));
 
-            log.info("role : {}", authority);
+            //log.info("role : {}", authority);
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

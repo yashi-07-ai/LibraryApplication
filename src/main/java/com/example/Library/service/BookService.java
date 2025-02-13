@@ -27,6 +27,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -94,12 +95,30 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
+    @Async
+    public CompletableFuture<String> processInBackground(Long id) {
+        System.out.println("Async task processing started for Book ID: " + id);
+        simulateDelay();
+        System.out.println("Async task processing completed for Book ID: " + id);
+        return CompletableFuture.completedFuture("Processed Book: " + id);
+    }
 
+    private void simulateDelay() {
+        try {
+            Thread.sleep(3000); // Simulate a 3-second delay
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    @Cacheable(value="books", key="#id")
     public BookResponseDTO getBookById(Long id) {
         log.info("Searching for book with id {}", id);
         Book book =  bookRepository.findById(id).orElseThrow(()-> new NoSuchBookExistsException(
                 "No book present with ID = " + id
         ));
+
+        simulateDelay();
 
         return convertToDTO(book);
     }

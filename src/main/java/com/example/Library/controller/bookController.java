@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -51,6 +52,12 @@ public class bookController {
     @GetMapping("/search-id/{id}")
     public BookResponseDTO getBookById(@PathVariable Long id) {
         return bookService.getBookById(id);
+    }
+
+    @PostConstruct
+    public void triggerAsyncTaskOnStartup() {
+        System.out.println("Starting async task on application startup...");
+        bookService.processInBackground(1L);  // Trigger async task for book ID 1
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MEMBER')")
