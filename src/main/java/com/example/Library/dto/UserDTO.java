@@ -28,6 +28,32 @@ public class UserDTO {
     @NotNull()
     private String role;
 
+    @NotNull()
+    private String roles_name;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    @NotNull
+    private String username;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @NotNull(message="Please enter password")
+    private String password;
+
+
     public String getRole() {
         return role;
     }

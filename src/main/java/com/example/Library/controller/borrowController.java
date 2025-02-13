@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class borrowController {
     @Autowired
     private BorrowedBooksRepository borrowedBooksRepository;
 
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MEMBER')")
     @PostMapping("/borrowBook/{userId}/{bookId}")
     @Operation(summary = "Borrow book", description = "Borrow book from library")
     @ApiResponses(value = {
@@ -35,6 +37,7 @@ public class borrowController {
         return ResponseEntity.ok("Book borrowed");
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MEMBER')")
     @PostMapping("/returnBook/{borrowId}")
     @Operation(summary = "Return book", description = "Return book to library")
     @ApiResponses(value = {
@@ -46,6 +49,7 @@ public class borrowController {
         return ResponseEntity.ok("Book returned");
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MEMBER')")
     @GetMapping("/all")
     @Operation(summary = "Get all books", description = "Retrieve all the borrowed books in the library")
     @ApiResponses(value = {

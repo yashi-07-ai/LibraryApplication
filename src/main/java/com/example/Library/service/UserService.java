@@ -10,6 +10,7 @@ import com.example.Library.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -23,6 +24,9 @@ import java.util.stream.Collectors;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private static Logger log = LoggerFactory.getLogger(UserService.class);
 
@@ -42,7 +46,9 @@ public class UserService {
         user.setName(userDto.getName());
         user.setEmail(userDto.getEmail());
         user.setPhoneNumber(userDto.getPhoneNumber());
-        user.setRole(User.UserRole.valueOf(userDto.getRole()));
+        user.setRole(User.UserRole.fromString(userDto.getRole()));
+        user.setUsername(userDto.getUsername());
+        user.setPassword(userDto.getPassword());
         return user;
     }
 
@@ -86,7 +92,7 @@ public class UserService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
-    public User addUser(UserDTO userDto){
+    public UserResponseDTO addUser(UserDTO userDto){
         log.info("Inside addUser method");
         User user = convertToEntity(userDto);
         if (user.getId() != null) {
@@ -94,17 +100,21 @@ public class UserService {
             throw new IllegalArgumentException("ID should be null for new users.");
         }
 
-        // You can also check if a book with the same title (or other unique field) exists
-        Optional<User> existingUser = userRepository.findByEmail(user.getEmail()); // Assuming title is unique
+        // You can also check if a user with the same username (or other unique field) exists
+        Optional<User> existingUser = userRepository.findByEmail(user.getEmail()); // Assuming username is unique
         if (existingUser.isPresent()) {
             log.error("User already exists");
             throw new UserAlreadyExists("User already exists with this email");
         }
 
+        // Encrypt the password before saving
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+
         // Save the new book
         log.info("Adding new user");
         userRepository.save(user);
-        return user;
+        return convertToDTO(user);
 
     }
 
