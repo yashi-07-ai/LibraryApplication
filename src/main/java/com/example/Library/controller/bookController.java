@@ -5,6 +5,9 @@ import com.example.Library.dto.BookDTO;
 import com.example.Library.dto.BookResponseDTO;
 import com.example.Library.exception.NullFieldException;
 import com.example.Library.service.BookService;
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Bucket;
+import io.github.bucket4j.Refill;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +26,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Duration;
 import java.util.List;
 
 @RestController
@@ -32,8 +37,14 @@ public class bookController {
     @Autowired
     private BookService bookService;
 
+    private final Bucket bucket;
+
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    public bookController(Bucket bucket) {
+        this.bucket = bucket;
+    }
 
     @PreAuthorize("hasAuthority('MEMBER')")
     @GetMapping("/")
@@ -45,7 +56,10 @@ public class bookController {
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MEMBER')")
     @GetMapping("/search-all")
     public List<BookResponseDTO> getAllBooks() {
-        return bookService.getAllBooks();
+        if(bucket.tryConsume(1)){
+            return bookService.getAllBooks();
+        }
+        throw new RuntimeException("try in some time, limit reached");
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MEMBER')")
@@ -53,6 +67,7 @@ public class bookController {
     public BookResponseDTO getBookById(@PathVariable Long id) {
         return bookService.getBookById(id);
     }
+
 
     @PostConstruct
     public void triggerAsyncTaskOnStartup() {
