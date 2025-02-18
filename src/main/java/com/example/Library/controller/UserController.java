@@ -4,6 +4,7 @@ import com.example.Library.dto.*;
 import com.example.Library.exception.*;
 import com.example.Library.model.User;
 //import com.example.Library.model.UserPrincipal;
+import com.example.Library.service.ApiService;
 import com.example.Library.service.BookService;
 import com.example.Library.service.JwtUtil;
 import com.example.Library.service.UserService;
@@ -23,6 +24,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
 
@@ -35,6 +37,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private ApiService apiService;
+
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -43,6 +48,14 @@ public class UserController {
 //    private User userPrincipal;
 
     private static Logger log = LoggerFactory.getLogger(UserService.class);
+
+
+    //hitting external api for demonstration purpose only
+    @GetMapping("/fetch")
+    public Mono<String> fetchInfo() {
+        return apiService.fetchInfo();
+    }
+
 
     // Get all users (Only for Admins)
     @PreAuthorize("hasRole('ADMIN')")
@@ -83,11 +96,23 @@ public class UserController {
 //        return ResponseEntity.ok(new AuthResponse(token, userDetails.getUsername(), userDetails.getAuthorities()));
 //    }
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     // Delete user (Only Admins can delete users)
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
+
+//        String token = jwtUtil.extractToken(request);
+//        // Extract actual token from "Bearer <token>"
+//        String jwt = token.substring(7);
+//        // Get token expiry time from JWT
+//        long expirationMillis = jwtUtil.getExpirationMillis(jwt);
+//        // Blacklist token
+//        jwtTokenBlacklistService.blacklistToken(jwt, expirationMillis);
+
         return ResponseEntity.ok("User deleted successfully");
     }
 }

@@ -8,7 +8,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -35,19 +38,21 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/auth/**", "*/swagger-ui/index.html#/**").permitAll()
-                        .requestMatchers("*/books/**", "*/books/search-id/**",
-                                "*/books/search-title/**").hasAuthority("ROLE_MEMBER")
-                        .requestMatchers("*/borrow/borrowBook/**", "*/borrow/returnBook/**").hasAnyAuthority("ROLE_MEMBER")
-                        .requestMatchers("*/borrow/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("*/books/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("*/user/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("*/actuator/**").permitAll()
+//                                .requestMatchers("/auth/**", "/swagger-ui/index.html#", "/v3/api-docs/**").permitAll()
+//                        .requestMatchers("/books/**", "/books/search-id/**",
+//                                "/books/search-title/**").hasAuthority("ROLE_MEMBER")
+//                        .requestMatchers("/borrow/borrowBook/**", "/borrow/returnBook/**").hasAuthority("ROLE_MEMBER")
+//                        .requestMatchers("/borrow/**").hasAuthority("ROLE_ADMIN")
+//                        .requestMatchers("/books/**").hasAuthority("ROLE_ADMIN")
+//                        .requestMatchers("/user/**").hasAuthority("ROLE_ADMIN")
+//                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .cors(Customizer.withDefaults())
                 .build();
     }
 

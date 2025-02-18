@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class BookResponseDTO {
 
@@ -34,6 +33,21 @@ public class BookResponseDTO {
 
     @Schema(description = "Book Availability", example = "true")
     private boolean available;
+
+    private String coverUrl;
+
+    public BookResponseDTO() {
+    }
+
+    public BookResponseDTO(String coverUrl){
+        this.coverUrl = coverUrl;
+    }
+
+    public BookResponseDTO(String title, String author, String coverUrl) {
+        this.title = title;
+        this.author = author;
+        this.coverUrl = coverUrl;
+    }
 
     public void setAvailable(boolean val){
         this.available = val;

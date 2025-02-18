@@ -5,28 +5,19 @@ import com.example.Library.dto.BookDTO;
 import com.example.Library.dto.BookResponseDTO;
 import com.example.Library.exception.NullFieldException;
 import com.example.Library.service.BookService;
-import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Refill;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
-import java.time.Duration;
 import java.util.List;
 
 @RestController
@@ -46,14 +37,14 @@ public class bookController {
         this.bucket = bucket;
     }
 
-    @PreAuthorize("hasAuthority('MEMBER')")
+    @PreAuthorize("hasRole('MEMBER')")
     @GetMapping("/")
     public String welcome(){
         return "welcome";
     }
 
     // Any authenticated user can search books
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'MEMBER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEMBER')")
     @GetMapping("/search-all")
     public List<BookResponseDTO> getAllBooks() {
         if(bucket.tryConsume(1)){
@@ -68,6 +59,11 @@ public class bookController {
         return bookService.getBookById(id);
     }
 
+    //    @PreAuthorize("hasAuthority('ADMIN')")
+//    @GetMapping("/detailsByISBN/{isbn}")
+//    public Mono<String> getBookDetails(@PathVariable String isbn) {
+//        return openLibraryService.getBookDetailsByIsbn(isbn);
+//    }
 
     @PostConstruct
     public void triggerAsyncTaskOnStartup() {
@@ -97,6 +93,13 @@ public class bookController {
         }
         bookService.processFile(file, userId);
         return ResponseEntity.ok("File uploaded successfully. Processing in background.");
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','MEMBER')")
+    @PostMapping("/updateAvailability")
+    public Mono<String> updateBookAvailability(@RequestParam String bookTitle, @RequestParam boolean isAvailable) {
+        return bookService.updateBookAvailability(bookTitle, isAvailable)
+                .thenReturn("Updated availability for " + bookTitle);
     }
 
     // Only Admins can update books

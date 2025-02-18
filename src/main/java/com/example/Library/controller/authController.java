@@ -19,6 +19,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Collection;
 
@@ -73,8 +75,6 @@ public class authController {
 
         UserDetails userDetails = (UserDetails) userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-
 
         String token = jwtUtil.generateToken(userDetails);
         String username = jwtUtil.extractUsername(token);

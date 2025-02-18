@@ -21,6 +21,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -267,6 +270,29 @@ public class BookService {
         // Delete the book
         bookRepository.delete(book);
         log.info("Book with id {} deleted", bookId);
+    }
+
+    private final Sinks.Many<BookAvailabilityEvent> sink;
+
+    public BookService() {
+        // Create a sink to emit events to multiple subscribers
+        this.sink = Sinks.many().multicast().onBackpressureBuffer();
+    }
+
+    // Method to simulate book availability update
+    public Mono<Void> updateBookAvailability(String bookTitle, boolean isAvailable) {
+        // Create a book availability event
+        BookAvailabilityEvent event = new BookAvailabilityEvent(bookTitle, isAvailable);
+
+        // Emit the event to the subscribers
+        sink.tryEmitNext(event);
+
+        return Mono.empty();
+    }
+
+    // Expose the Flux stream for subscribers to listen
+    public Flux<BookAvailabilityEvent> getBookAvailabilityStream() {
+        return sink.asFlux();
     }
 
 }

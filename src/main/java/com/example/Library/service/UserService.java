@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
@@ -121,7 +122,7 @@ public class UserService {
     @Transactional
     public void deleteUser(Long id){
         log.info("Inside deleteUser method");
-        Optional<User> userOptional = userRepository.findById(1L);
+        Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             log.info("Deleting user");
